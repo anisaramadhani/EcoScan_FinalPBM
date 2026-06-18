@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'riwayat_page.dart';
 import 'scan.dart';
+import 'profile_page.dart'; 
 
 class DashboardPage extends StatelessWidget {
-  DashboardPage({super.key});
+  const DashboardPage({super.key});
 
   final Color primaryGreen = const Color(0xFF7D9E7A);
   final Color lightGreen = const Color(0xFFE7F0E1);
@@ -293,23 +294,42 @@ class DashboardPage extends StatelessWidget {
         type: BottomNavigationBarType.fixed,
 
         onTap: (index) {
-        if (index == 1) {
-            Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (_) => const RiwayatPage(),
-            ),
-            );
-        }
 
-        if (index == 2) {
+          if (index == 1) {
+
             Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (_) => const ScanPage(),
-            ),
+              context,
+              MaterialPageRoute(
+                builder: (_) => const RiwayatPage(),
+              ),
             );
-        }
+
+          }
+
+
+          if (index == 2) {
+
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const ScanPage(),
+              ),
+            );
+
+          }
+
+
+          if (index == 3) {
+
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const ProfilePage(),
+              ),
+            );
+
+          }
+
         },
 
         items: const [

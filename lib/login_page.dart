@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'signup_page.dart';
-
+import 'dashboard.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -115,20 +115,25 @@ class _LoginPageState extends State<LoginPage> {
                     height:50,
 
                     child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF436946)
+                    ),
 
-                      style: ElevatedButton.styleFrom(
+                    onPressed:(){
 
-                        backgroundColor:
-                        const Color(0xFF436946)
+                      Navigator.pushReplacement(
+                        context,
 
-                      ),
+                        MaterialPageRoute(
+                          builder: (context) => const DashboardPage(),
+                        ),
 
-                      onPressed:(){
+                      );
 
-                      },
+                    },
 
-                      child: const Text(
-                        "Masuk",
+                    child: const Text(
+                      "Masuk",
                         style:TextStyle(
                           color:Colors.white
                         ),
