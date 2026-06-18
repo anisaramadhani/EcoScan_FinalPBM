@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+
 import 'dashboard.dart';
+import 'scan.dart';
+import 'profile_page.dart';
 
 class RiwayatPage extends StatefulWidget {
   const RiwayatPage({super.key});
@@ -28,7 +31,6 @@ class _RiwayatPageState extends State<RiwayatPage> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-
             /// TAB SWITCHER
             Container(
               height: 42,
@@ -38,51 +40,50 @@ class _RiwayatPageState extends State<RiwayatPage> {
               ),
               child: Row(
                 children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          showHistory = true;
+                        });
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: showHistory
+                              ? Colors.grey.shade200
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: const Center(
+                          child: Text("Riwayat Scan"),
+                        ),
+                      ),
+                    ),
+                  ),
 
                   Expanded(
-                child: GestureDetector(
-                    onTap: () {
-                    setState(() {
-                        showHistory = true;
-                    });
-                    },
-                    child: Container(
-                    decoration: BoxDecoration(
-                        color: showHistory
-                            ? Colors.grey.shade200
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(30),
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          showHistory = false;
+                        });
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: !showHistory
+                              ? Colors.grey.shade200
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: const Center(
+                          child: Text("Dampak Saya"),
+                        ),
+                      ),
                     ),
-                    child: const Center(
-                        child: Text("Riwayat Scan"),
-                    ),
-                    ),
-                ),
-                ),
-
-                Expanded(
-                child: GestureDetector(
-                    onTap: () {
-                    setState(() {
-                        showHistory = false;
-                    });
-                    },
-                    child: Container(
-                    decoration: BoxDecoration(
-                        color: !showHistory
-                            ? Colors.grey.shade200
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(30),
-                    ),
-                    child: const Center(
-                        child: Text("Dampak Saya"),
-                    ),
-                    ),
-                ),
-                ),
-                    ],
-                ),
-                ),
+                  ),
+                ],
+              ),
+            ),
 
             const SizedBox(height: 20),
 
@@ -101,14 +102,38 @@ class _RiwayatPageState extends State<RiwayatPage> {
         type: BottomNavigationBarType.fixed,
 
         onTap: (index) {
-        if (index == 0) {
-            Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-                builder: (context) => DashboardPage(),
-            ),
-            );
-        }
+          switch (index) {
+            case 0:
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => DashboardPage(),
+                ),
+              );
+              break;
+
+            case 1:
+              // Sudah berada di halaman Riwayat
+              break;
+
+            case 2:
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const ScanPage(),
+                ),
+              );
+              break;
+
+            case 3:
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const ProfilePage(),
+                ),
+              );
+              break;
+          }
         },
 
         items: const [
@@ -136,7 +161,6 @@ class _RiwayatPageState extends State<RiwayatPage> {
   Widget _historyView() {
     return ListView(
       children: [
-
         _historyCard(
           "Sabun Cuci Piring Ekologis",
           "EcoClean",
@@ -174,10 +198,8 @@ class _RiwayatPageState extends State<RiwayatPage> {
     return SingleChildScrollView(
       child: Column(
         children: [
-
           Row(
             children: [
-
               Expanded(
                 child: _impactBox(
                   "5/6",
@@ -209,7 +231,6 @@ class _RiwayatPageState extends State<RiwayatPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-
                 const Text(
                   "Karbon Hemat Per Minggu",
                   style: TextStyle(
@@ -222,12 +243,9 @@ class _RiwayatPageState extends State<RiwayatPage> {
                 SizedBox(
                   height: 180,
                   child: Row(
-                    mainAxisAlignment:
-                        MainAxisAlignment.spaceEvenly,
-                    crossAxisAlignment:
-                        CrossAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-
                       _bar(120),
                       _bar(150),
                       _bar(100),
@@ -249,8 +267,7 @@ class _RiwayatPageState extends State<RiwayatPage> {
             ),
             child: ListTile(
               leading: CircleAvatar(
-                backgroundColor:
-                    const Color(0xFFEAF1E3),
+                backgroundColor: const Color(0xFFEAF1E3),
                 child: Icon(
                   Icons.eco,
                   color: primaryGreen,
@@ -273,9 +290,10 @@ class _RiwayatPageState extends State<RiwayatPage> {
   }
 
   Widget _historyCard(
-      String title,
-      String brand,
-      String grade) {
+    String title,
+    String brand,
+    String grade,
+  ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(14),
@@ -322,9 +340,10 @@ class _RiwayatPageState extends State<RiwayatPage> {
   }
 
   Widget _impactBox(
-      String value,
-      String title,
-      IconData icon) {
+    String value,
+    String title,
+    IconData icon,
+  ) {
     return Container(
       height: 140,
       padding: const EdgeInsets.all(12),
@@ -333,8 +352,7 @@ class _RiwayatPageState extends State<RiwayatPage> {
         borderRadius: BorderRadius.circular(18),
       ),
       child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(
             icon,
