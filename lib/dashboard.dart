@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'riwayat_page.dart';
 import 'scan.dart';
-import 'profile_page.dart'; 
+import 'profile_page.dart';
+import 'edubit_pages.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
 
-  final Color primaryGreen = const Color(0xFF7D9E7A);
-  final Color lightGreen = const Color(0xFFE7F0E1);
+  static const Color primaryGreen = Color(0xFF7D9E7A);
+  static const Color lightGreen = Color(0xFFE7F0E1);
 
   @override
   Widget build(BuildContext context) {
@@ -17,10 +18,10 @@ class DashboardPage extends StatelessWidget {
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
+
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
               /// Dashboard Title
               const Text(
                 "Dashboard",
@@ -54,74 +55,90 @@ class DashboardPage extends StatelessWidget {
 
               const SizedBox(height: 20),
 
-              /// Tip Card
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(18),
-                decoration: BoxDecoration(
-                  color: primaryGreen,
+              /// TIP CARD (BISA DIKLIK)
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
                   borderRadius: BorderRadius.circular(18),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const EduBitPage(),
                       ),
-                      decoration: BoxDecoration(
-                        color: Colors.white24,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: const Text(
-                        "🏆 Tip Hari Ini",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
+                    );
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(18),
+                    decoration: BoxDecoration(
+                      color: primaryGreen,
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    child: Column(
+                      crossAxisAlignment:
+                          CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding:
+                              const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white24,
+                            borderRadius:
+                                BorderRadius.circular(20),
+                          ),
+                          child: const Text(
+                            "🏆 Tip Hari Ini",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                            ),
+                          ),
                         ),
-                      ),
+
+                        const SizedBox(height: 14),
+
+                        const Text(
+                          "Kurangi Plastik Sekali Pakai",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                          ),
+                        ),
+
+                        const SizedBox(height: 8),
+
+                        const Text(
+                          "Dengan membawa botol minum sendiri,\nAnda bisa mengurangi hingga 156 botol\nplastik per tahun!",
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 13,
+                          ),
+                        ),
+
+                        const SizedBox(height: 12),
+
+                        const Align(
+                          alignment: Alignment.centerRight,
+                          child: Icon(
+                            Icons.arrow_forward_ios,
+                            color: Colors.white,
+                            size: 18,
+                          ),
+                        ),
+                      ],
                     ),
-
-                    const SizedBox(height: 14),
-
-                    const Text(
-                      "Kurangi Plastik Sekali Pakai",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                      ),
-                    ),
-
-                    const SizedBox(height: 8),
-
-                    const Text(
-                      "Dengan membawa botol minum sendiri,\nAnda bisa mengurangi hingga 156 botol\nplastik per tahun!",
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 13,
-                      ),
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    const Align(
-                      alignment: Alignment.centerRight,
-                      child: Icon(
-                        Icons.arrow_forward_ios,
-                        color: Colors.white,
-                        size: 18,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
 
               const SizedBox(height: 20),
 
-              /// Impact Card
+              /// IMPACT CARD
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(18),
@@ -130,9 +147,9 @@ class DashboardPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(18),
                 ),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start,
                   children: [
-
                     const Text(
                       "Dampak Minggu Ini",
                       style: TextStyle(
@@ -147,7 +164,6 @@ class DashboardPage extends StatelessWidget {
                       mainAxisAlignment:
                           MainAxisAlignment.spaceAround,
                       children: [
-
                         Column(
                           children: [
                             Container(
@@ -158,7 +174,7 @@ class DashboardPage extends StatelessWidget {
                                 borderRadius:
                                     BorderRadius.circular(12),
                               ),
-                              child: Icon(
+                              child: const Icon(
                                 Icons.eco,
                                 color: primaryGreen,
                               ),
@@ -166,7 +182,7 @@ class DashboardPage extends StatelessWidget {
 
                             const SizedBox(height: 10),
 
-                            Text(
+                            const Text(
                               "2.4 kg",
                               style: TextStyle(
                                 fontSize: 24,
@@ -194,7 +210,7 @@ class DashboardPage extends StatelessWidget {
                                 borderRadius:
                                     BorderRadius.circular(12),
                               ),
-                              child: Icon(
+                              child: const Icon(
                                 Icons.qr_code_scanner,
                                 color: primaryGreen,
                               ),
@@ -202,7 +218,7 @@ class DashboardPage extends StatelessWidget {
 
                             const SizedBox(height: 10),
 
-                            Text(
+                            const Text(
                               "12",
                               style: TextStyle(
                                 fontSize: 24,
@@ -227,7 +243,7 @@ class DashboardPage extends StatelessWidget {
 
               const SizedBox(height: 20),
 
-              /// Recent Products
+              /// PRODUK TERAKHIR
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(18),
@@ -237,28 +253,36 @@ class DashboardPage extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
-
                     Row(
-                      mainAxisAlignment:
-                          MainAxisAlignment.spaceBetween,
-                      children: const [
-
-                        Text(
-                          "Produk Terakhir Di-scan",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Produk Terakhir Di-scan",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
                         ),
+                      ),
 
-                        Text(
+                      InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const RiwayatPage(),
+                            ),
+                          );
+                        },
+                        child: const Text(
                           "Lihat Semua",
                           style: TextStyle(
-                            color: Colors.grey,
+                            color: Colors.blue,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
+                  ),
 
                     const SizedBox(height: 15),
 
@@ -294,42 +318,34 @@ class DashboardPage extends StatelessWidget {
         type: BottomNavigationBarType.fixed,
 
         onTap: (index) {
+          switch (index) {
+            case 1:
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const RiwayatPage(),
+                ),
+              );
+              break;
 
-          if (index == 1) {
+            case 2:
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const ScanPage(),
+                ),
+              );
+              break;
 
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const RiwayatPage(),
-              ),
-            );
-
+            case 3:
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const ProfilePage(),
+                ),
+              );
+              break;
           }
-
-
-          if (index == 2) {
-
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const ScanPage(),
-              ),
-            );
-
-          }
-
-
-          if (index == 3) {
-
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const ProfilePage(),
-              ),
-            );
-
-          }
-
         },
 
         items: const [
@@ -337,17 +353,14 @@ class DashboardPage extends StatelessWidget {
             icon: Icon(Icons.home_outlined),
             label: "Home",
           ),
-
           BottomNavigationBarItem(
             icon: Icon(Icons.history),
             label: "Riwayat",
           ),
-
           BottomNavigationBarItem(
             icon: Icon(Icons.qr_code_scanner),
             label: "Scan",
           ),
-
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),
             label: "Profil",
@@ -357,7 +370,7 @@ class DashboardPage extends StatelessWidget {
     );
   }
 
-  Widget _productTile(
+  static Widget _productTile(
     String title,
     String subtitle,
     String grade,
@@ -374,7 +387,7 @@ class DashboardPage extends StatelessWidget {
             color: lightGreen,
             borderRadius: BorderRadius.circular(10),
           ),
-          child: Icon(
+          child: const Icon(
             Icons.eco,
             color: primaryGreen,
           ),
