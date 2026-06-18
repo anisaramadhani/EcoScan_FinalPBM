@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'signup_page.dart';
+import 'login_page.dart';
 
 class EcoScanLandingPage extends StatelessWidget {
   const EcoScanLandingPage({super.key});
@@ -14,9 +16,18 @@ class EcoScanLandingPage extends StatelessWidget {
             children: [
               // Header
               Align(
-                alignment: Alignment.topRight,
-                child: TextButton(
-                  onPressed: () {},
+              alignment: Alignment.topRight,
+              child: TextButton(
+                onPressed: () {
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const LoginPage(),
+                    ),
+                  );
+
+                },
                   child: const Text(
                     "Masuk",
                     style: TextStyle(
@@ -80,7 +91,14 @@ class EcoScanLandingPage extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF436946),
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SignUpPage(),
+                    ),
+                  );
+                },
                   child: const Text(
                     "Mulai Gratis",
                     style: TextStyle(
@@ -98,7 +116,16 @@ class EcoScanLandingPage extends StatelessWidget {
                 width: double.infinity,
                 height: 50,
                 child: OutlinedButton(
-                  onPressed: () {},
+                onPressed: () {
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const LoginPage(),
+                    ),
+                  );
+
+                },
                   child: const Text(
                     "Masuk",
                     style: TextStyle(
