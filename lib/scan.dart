@@ -41,23 +41,50 @@ class _ScanPageState extends State<ScanPage> {
 
 
 
-  void _openScanResult(String barcode) {
-
-
-    Navigator.pushReplacement(
-
-      context,
-
-
-      MaterialPageRoute(
-
-        builder: (context) => const ScanResultPage(),
-
-      ),
-
+  void _showManualInput(BuildContext context) {
+    final txtController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text("Input Barcode Manual"),
+          content: TextField(
+            controller: txtController,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(
+              hintText: "Contoh: 8992326110301",
+              border: OutlineInputBorder(),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text("Batal"),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF436946)),
+              onPressed: () {
+                final barcode = txtController.text.trim();
+                if (barcode.isNotEmpty) {
+                  Navigator.pop(dialogContext);
+                  _openScanResult(barcode);
+                }
+              },
+              child: const Text("Cari", style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        );
+      },
     );
+  }
 
-
+  void _openScanResult(String barcode) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ScanResultPage(barcode: barcode),
+      ),
+    );
   }
 
 
@@ -92,6 +119,13 @@ class _ScanPageState extends State<ScanPage> {
 
         elevation:0,
 
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.edit, color: Color(0xFF436946)),
+            tooltip: "Input Barcode Manual",
+            onPressed: () => _showManualInput(context),
+          ),
+        ],
 
       ),
 

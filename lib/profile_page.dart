@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'services/product_service.dart';
+import 'services/auth_service.dart';
 import 'dashboard.dart';
 import 'riwayat_page.dart';
 import 'scan.dart';
@@ -12,201 +15,233 @@ import 'privacy_polices.dart';
 import 'terms.dart';
 import 'login_page.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
   @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
+  final ProductService _productService = ProductService();
+  final AuthService _authService = AuthService();
+
+  @override
   Widget build(BuildContext context) {
+    final user = _auth.currentUser;
+    final uid = user?.uid ?? '';
+    final email = user?.email ?? 'EcoScan@email.com';
+
     return Scaffold(
       backgroundColor: const Color(0xFFE8F5E9),
-
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
+        child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+          stream: uid.isNotEmpty
+              ? _db.collection('users').doc(uid).snapshots()
+              : const Stream.empty(),
+          builder: (context, userSnapshot) {
+            String name = "Pengguna EcoScan";
+            if (userSnapshot.hasData && userSnapshot.data!.exists) {
+              name = userSnapshot.data!.data()?['name'] ?? "Pengguna EcoScan";
+            }
 
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                "Profil",
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+            return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+              stream: uid.isNotEmpty
+                  ? _productService.getScanHistoryStream(uid)
+                  : const Stream.empty(),
+              builder: (context, historySnapshot) {
+                int totalScan = 0;
+                double totalCo2 = 0.0;
 
-              const SizedBox(height: 16),
+                if (historySnapshot.hasData) {
+                  final docs = historySnapshot.data!.docs;
+                  totalScan = docs.length;
+                  for (var doc in docs) {
+                    final co2 = doc.data()['co2Saved'];
+                    if (co2 != null) {
+                      totalCo2 += (co2 as num).toDouble();
+                    }
+                  }
+                }
 
-              /// CARD PROFIL
-              Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: ListTile(
-                  leading: const CircleAvatar(
-                    radius: 30,
-                    backgroundImage: NetworkImage(
-                      "https://via.placeholder.com/150",
-                    ),
-                  ),
-                  title: const Text(
-                    "Pengguna EcoScan",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  subtitle: const Text(
-                    "EcoScan@email.com",
-                  ),
-                  trailing: OutlinedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const EditProfilePage(),
-                        ),
-                      );
-                    },
-                    child: const Text("Edit"),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              /// STATISTIK
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildStatItem(
-                        "47",
-                        "Total Scan",
+                      const Text(
+                        "Profil",
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                      _buildStatItem(
-                        "8.7 kg",
-                        "CO₂ Hemat",
+                      const SizedBox(height: 16),
+
+                      /// CARD PROFIL
+                      Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: ListTile(
+                          leading: const CircleAvatar(
+                            radius: 30,
+                            backgroundImage: NetworkImage(
+                              "https://api.dicebear.com/7.x/bottts/png?seed=ecoscan",
+                            ),
+                          ),
+                          title: Text(
+                            name,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          subtitle: Text(email),
+                          trailing: OutlinedButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const EditProfilePage(),
+                                ),
+                              ).then((_) {
+                                setState(() {}); // Refresh state when coming back
+                              });
+                            },
+                            child: const Text("Edit"),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      /// STATISTIK
+                      Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              _buildStatItem(
+                                "$totalScan",
+                                "Total Scan",
+                              ),
+                              _buildStatItem(
+                                "${totalCo2.toStringAsFixed(1)} kg",
+                                "CO₂ Hemat",
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      /// PENGATURAN
+                      const Text(
+                        "Pengaturan",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      _buildSettingList(context),
+                      const SizedBox(height: 16),
+
+                      /// AKUN
+                      const Text(
+                        "Akun",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      _buildAccountOptions(context),
+                      const SizedBox(height: 16),
+
+                      /// LOGOUT
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          icon: const Icon(Icons.logout, color: Colors.red),
+                          label: const Text("Keluar", style: TextStyle(color: Colors.red)),
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: const Text("Logout"),
+                                content: const Text(
+                                  "Apakah Anda yakin ingin keluar dari akun?",
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                    child: const Text("Batal"),
+                                  ),
+                                  ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.red,
+                                    ),
+                                    onPressed: () async {
+                                      Navigator.pop(context);
+                                      await _authService.logout();
+                                      if (mounted) {
+                                        Navigator.pushAndRemoveUntil(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => const LoginPage(),
+                                          ),
+                                          (route) => false,
+                                        );
+                                      }
+                                    },
+                                    child: const Text(
+                                      "Keluar",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      const Center(
+                        child: Text(
+                          "EcoScan v1.0.0",
+                          style: TextStyle(
+                            color: Colors.grey,
+                            fontSize: 12,
+                          ),
+                        ),
                       ),
                     ],
                   ),
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              /// PENGATURAN
-              const Text(
-                "Pengaturan",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-
-              const SizedBox(height: 8),
-
-              _buildSettingList(context),
-
-              const SizedBox(height: 16),
-
-              /// AKUN
-              const Text(
-                "Akun",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-
-              const SizedBox(height: 8),
-
-              _buildAccountOptions(context),
-
-              const SizedBox(height: 16),
-
-              /// LOGOUT
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  icon: const Icon(Icons.logout),
-                  label: const Text("Keluar"),
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: const Text("Logout"),
-                        content: const Text(
-                          "Apakah Anda yakin ingin keluar dari akun?",
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            child: const Text("Batal"),
-                          ),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red,
-                            ),
-                            onPressed: () {
-                              Navigator.pop(context);
-
-                              Navigator.pushAndRemoveUntil(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const LoginPage(),
-                                ),
-                                (route) => false,
-                              );
-                            },
-                            child: const Text(
-                              "Keluar",
-                              style: TextStyle(
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ),
-
-              const SizedBox(height: 8),
-
-              const Center(
-                child: Text(
-                  "EcoScan v1.0.0",
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 12,
-                  ),
-                ),
-              ),
-            ],
-          ),
+                );
+              },
+            );
+          },
         ),
       ),
-
-      /// BOTTOM NAVIGATION
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: 3,
         type: BottomNavigationBarType.fixed,
         selectedItemColor: Colors.green.shade900,
-
         onTap: (index) {
           switch (index) {
             case 0:
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => DashboardPage(),
+                  builder: (_) => const DashboardPage(),
                 ),
               );
               break;
-
             case 1:
               Navigator.pushReplacement(
                 context,
@@ -215,7 +250,6 @@ class ProfilePage extends StatelessWidget {
                 ),
               );
               break;
-
             case 2:
               Navigator.pushReplacement(
                 context,
@@ -224,12 +258,10 @@ class ProfilePage extends StatelessWidget {
                 ),
               );
               break;
-
             case 3:
               break;
           }
         },
-
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home_outlined),
@@ -347,7 +379,9 @@ class ProfilePage extends StatelessWidget {
                 MaterialPageRoute(
                   builder: (_) => const EditProfilePage(),
                 ),
-              );
+              ).then((_) {
+                setState(() {});
+              });
             },
           ),
           ListTile(

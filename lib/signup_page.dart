@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dashboard.dart';
+import 'services/auth_service.dart';
+import 'services/user_service.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -12,6 +14,10 @@ class _SignUpPageState extends State<SignUpPage> {
   bool isChecked = false;
   bool obscurePassword = true;
   bool obscureConfirmPassword = true;
+  bool _isLoading = false;
+
+  final AuthService _authService = AuthService();
+  final UserService _userService = UserService();
 
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
@@ -168,24 +174,90 @@ class _SignUpPageState extends State<SignUpPage> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        onPressed: () {
+                        onPressed: _isLoading ? null : () async {
+                          final name = nameController.text.trim();
+                          final email = emailController.text.trim();
+                          final password = passwordController.text.trim();
+                          final confirmPassword = confirmPasswordController.text.trim();
 
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const DashboardPage(),
-                          ),
-                        );
+                          if (name.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text("Semua kolom harus diisi")),
+                            );
+                            return;
+                          }
 
-                      },
-                        child: const Text(
-                          "Daftar",
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                          if (password != confirmPassword) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text("Konfirmasi password tidak cocok")),
+                            );
+                            return;
+                          }
+
+                          if (!isChecked) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text("Anda harus menyetujui Syarat & Ketentuan")),
+                            );
+                            return;
+                          }
+
+                          setState(() {
+                            _isLoading = true;
+                          });
+
+                          try {
+                            final userCredential = await _authService.register(
+                              email: email,
+                              password: password,
+                            );
+                            
+                            if (userCredential.user != null) {
+                              await _userService.createUser(
+                                uid: userCredential.user!.uid,
+                                email: email,
+                                name: name,
+                              );
+                            }
+
+                            if (mounted) {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const DashboardPage(),
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text("Gagal mendaftar: ${e.toString().replaceAll(RegExp(r'\[.*?\]\s*'), '')}")),
+                              );
+                            }
+                          } finally {
+                            if (mounted) {
+                              setState(() {
+                                _isLoading = false;
+                              });
+                            }
+                          }
+                        },
+                        child: _isLoading
+                            ? const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2.5,
+                                ),
+                              )
+                            : const Text(
+                                "Daftar",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                       ),
                     ),
 

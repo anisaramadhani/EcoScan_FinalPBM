@@ -1,13 +1,50 @@
 import 'package:flutter/material.dart';
+import 'services/product_service.dart';
 
-class AlternativeProductsPage extends StatelessWidget {
-  const AlternativeProductsPage({super.key});
+class AlternativeProductsPage extends StatefulWidget {
+  final String category;
+  final String barcode;
+
+  const AlternativeProductsPage({
+    super.key,
+    required this.category,
+    required this.barcode,
+  });
+
+  @override
+  State<AlternativeProductsPage> createState() => _AlternativeProductsPageState();
+}
+
+class _AlternativeProductsPageState extends State<AlternativeProductsPage> {
+  final ProductService _productService = ProductService();
+  late Future<List<Map<String, dynamic>>> _alternativesFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _alternativesFuture = _productService.getAlternatives(widget.category, widget.barcode);
+  }
+
+  Color _getGradeColor(String grade) {
+    switch (grade.toUpperCase()) {
+      case 'A':
+        return const Color(0xFF436946);
+      case 'B':
+        return Colors.green.shade400;
+      case 'C':
+        return Colors.amber;
+      case 'D':
+        return Colors.orange;
+      case 'E':
+      default:
+        return Colors.red;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFE8F5E9),
-
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -28,190 +65,163 @@ class AlternativeProductsPage extends StatelessWidget {
           ),
         ),
       ),
+      body: FutureBuilder<List<Map<String, dynamic>>>(
+        future: _alternativesFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator(color: Color(0xFF436946)));
+          }
 
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+          if (snapshot.hasError) {
+            return Center(child: Text("Error: ${snapshot.error}"));
+          }
 
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              "Produk yang di-scan:",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            ),
+          final alternatives = snapshot.data ?? [];
 
-            const SizedBox(height: 8),
-
-            _buildScannedProductCard(),
-
-            const SizedBox(height: 20),
-
-            const Text(
-              "Alternatif yang Direkomendasikan:",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            ),
-
-            const SizedBox(height: 8),
-
-            ...List.generate(
-              3,
-              (index) => _buildAlternativeProductCard(),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildScannedProductCard() {
-    return Card(
-      color: const Color(0xFF9FBC9C),
-      elevation: 0,
-
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-
-        child: Row(
-          children: [
-            Container(
-              width: 50,
-              height: 50,
-
-              decoration: BoxDecoration(
-                color: Colors.green.shade100,
-                borderRadius: BorderRadius.circular(10),
-              ),
-
-              child: const Icon(
-                Icons.qr_code_scanner,
-                color: Color(0xFF436946),
-              ),
-            ),
-
-            const SizedBox(width: 12),
-
-            const Expanded(
-              child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Sabun Cuci Piring Ekologis",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                    ),
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "Kategori Produk yang di-scan:",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
                   ),
-
-                  SizedBox(height: 4),
-
-                  Text("EcoClean"),
-
-                  SizedBox(height: 4),
-
-                  Text(
-                    "Rp 25.000",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 14,
-                vertical: 10,
-              ),
-
-              decoration: BoxDecoration(
-                color: Colors.green.shade600,
-                borderRadius: BorderRadius.circular(8),
-              ),
-
-              child: const Text(
-                "A",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
                 ),
-              ),
+                const SizedBox(height: 8),
+                
+                // Card kategori
+                Card(
+                  color: const Color(0xFF9FBC9C),
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 45,
+                          height: 45,
+                          decoration: BoxDecoration(
+                            color: Colors.green.shade100,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(
+                            Icons.category_outlined,
+                            color: Color(0xFF436946),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                "Kategori Terdeteksi",
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.black54,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                widget.category,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                const Text(
+                  "Alternatif yang Direkomendasikan:",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 8),
+
+                if (alternatives.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 24.0),
+                    child: Center(
+                      child: Text("Tidak ada rekomendasi alternatif untuk saat ini."),
+                    ),
+                  )
+                else
+                  ...alternatives.map((prod) => _buildAlternativeProductCard(prod)),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildAlternativeProductCard() {
+  Widget _buildAlternativeProductCard(Map<String, dynamic> product) {
+    final ecoScore = product['ecoScore'] ?? 'B';
+    final gradeColor = _getGradeColor(ecoScore);
+    final String storeList = (product['stores'] as List<dynamic>?)?.join(', ') ?? 'Supermarket Lokal';
+
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
-
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
-
       child: Padding(
         padding: const EdgeInsets.all(16),
-
         child: Column(
-          crossAxisAlignment:
-              CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
                 Expanded(
                   child: Column(
-                    crossAxisAlignment:
-                        CrossAxisAlignment.start,
-                    children: const [
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       Text(
-                        "Sabun Cuci Piring Organik Premium",
-                        style: TextStyle(
+                        product['name'] ?? 'Produk Organik',
+                        style: const TextStyle(
                           fontWeight: FontWeight.bold,
+                          fontSize: 15,
                         ),
                       ),
-
-                      SizedBox(height: 4),
-
-                      Text("Nature's Clean"),
-
-                      SizedBox(height: 4),
-
+                      const SizedBox(height: 4),
                       Text(
-                        "Rp 28.000",
-                        style: TextStyle(
+                        product['brand'] ?? 'Brand Eco',
+                        style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        "Rp ${(product['price'] ?? 20000.0).toStringAsFixed(0)}",
+                        style: const TextStyle(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],
                   ),
                 ),
-
+                const SizedBox(width: 8),
                 Container(
                   padding: const EdgeInsets.all(12),
-
                   decoration: BoxDecoration(
-                    color: Colors.green,
-                    borderRadius:
-                        BorderRadius.circular(8),
+                    color: gradeColor,
+                    borderRadius: BorderRadius.circular(8),
                   ),
-
-                  child: const Text(
-                    "A",
-                    style: TextStyle(
+                  child: Text(
+                    ecoScore,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -220,53 +230,46 @@ class AlternativeProductsPage extends StatelessWidget {
                 ),
               ],
             ),
-
             const SizedBox(height: 12),
-
             Wrap(
               spacing: 8,
               runSpacing: 8,
               children: [
                 Chip(
-                  backgroundColor:
-                      Colors.green.shade100,
+                  backgroundColor: Colors.green.shade100,
                   label: const Text(
                     "Lebih Hijau",
                     style: TextStyle(
                       fontSize: 12,
+                      color: Color(0xFF436946),
                     ),
                   ),
                 ),
-
                 Chip(
-                  backgroundColor:
-                      Colors.green.shade100,
+                  backgroundColor: Colors.green.shade100,
                   label: const Text(
-                    "Merek Lokal",
+                    "Ramah Lingkungan",
                     style: TextStyle(
                       fontSize: 12,
+                      color: Color(0xFF436946),
                     ),
                   ),
                 ),
               ],
             ),
-
             const SizedBox(height: 8),
-
-            const Row(
+            Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.location_on,
                   size: 16,
                   color: Colors.grey,
                 ),
-
-                SizedBox(width: 4),
-
+                const SizedBox(width: 4),
                 Expanded(
                   child: Text(
-                    "Tersedia di: Alfamart, Indomaret",
-                    style: TextStyle(
+                    "Tersedia di: $storeList",
+                    style: const TextStyle(
                       fontSize: 12,
                       color: Colors.grey,
                     ),

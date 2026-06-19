@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'signup_page.dart';
 import 'dashboard.dart';
+import 'services/auth_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -10,8 +11,9 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-
   bool hidePassword = true;
+  bool _isLoading = false;
+  final AuthService _authService = AuthService();
 
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
@@ -119,25 +121,61 @@ class _LoginPageState extends State<LoginPage> {
                       backgroundColor: const Color(0xFF436946)
                     ),
 
-                    onPressed:(){
+                    onPressed: _isLoading ? null : () async {
+                      final email = emailController.text.trim();
+                      final password = passwordController.text.trim();
 
-                      Navigator.pushReplacement(
-                        context,
+                      if (email.isEmpty || password.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Email dan password tidak boleh kosong")),
+                        );
+                        return;
+                      }
 
-                        MaterialPageRoute(
-                          builder: (context) => const DashboardPage(),
-                        ),
+                      setState(() {
+                        _isLoading = true;
+                      });
 
-                      );
-
+                      try {
+                        await _authService.login(email: email, password: password);
+                        if (mounted) {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const DashboardPage(),
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text("Gagal masuk: ${e.toString().replaceAll(RegExp(r'\[.*?\]\s*'), '')}")),
+                          );
+                        }
+                      } finally {
+                        if (mounted) {
+                          setState(() {
+                            _isLoading = false;
+                          });
+                        }
+                      }
                     },
 
-                    child: const Text(
-                      "Masuk",
-                        style:TextStyle(
-                          color:Colors.white
-                        ),
-                      ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2.5,
+                            ),
+                          )
+                        : const Text(
+                            "Masuk",
+                            style: TextStyle(
+                              color: Colors.white
+                            ),
+                          ),
                     ),
                   ),
 
