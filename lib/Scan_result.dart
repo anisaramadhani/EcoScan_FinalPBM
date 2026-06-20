@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'services/product_service.dart';
 import 'alternative_products.dart';
+import 'dashboard.dart';
 
 class ScanResultPage extends StatefulWidget {
   final String barcode;
@@ -125,7 +126,15 @@ class _ScanResultPageState extends State<ScanResultPage> {
           elevation: 0,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back, color: Colors.black),
-            onPressed: () => Navigator.pop(context),
+            onPressed: () {
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => DashboardPage(),
+                ),
+                (route) => false,
+              );
+            },
           ),
           title: const Text("Hasil Scan", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
         ),
@@ -172,7 +181,13 @@ class _ScanResultPageState extends State<ScanResultPage> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () {
-            Navigator.pop(context);
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                builder: (context) => DashboardPage(),
+              ),
+              (route) => false,
+            );
           },
         ),
         title: const Text(
