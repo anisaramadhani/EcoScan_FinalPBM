@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'scan_result.dart';
+import 'dashboard.dart';
 
 
 class ScanPage extends StatefulWidget {
@@ -93,41 +94,41 @@ class _ScanPageState extends State<ScanPage> {
 
   @override
   Widget build(BuildContext context) {
-
-
-    return Scaffold(
-
-
-      backgroundColor: const Color(0xFFEAF1E3),
-
-
-
-      appBar: AppBar(
-
-
-        title: const Text(
-          "Scan Produk",
-        ),
-
-
-        centerTitle:true,
-
-
-        backgroundColor:
-        const Color(0xFFEAF1E3),
-
-
-        elevation:0,
-
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.edit, color: Color(0xFF436946)),
-            tooltip: "Input Barcode Manual",
-            onPressed: () => _showManualInput(context),
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        if (didPop) return;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const DashboardPage()),
+        );
+      },
+      child: Scaffold(
+        backgroundColor: const Color(0xFFEAF1E3),
+        appBar: AppBar(
+          title: const Text(
+            "Scan Produk",
           ),
-        ],
-
-      ),
+          centerTitle: true,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Color(0xFF436946)),
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const DashboardPage()),
+              );
+            },
+          ),
+          backgroundColor: const Color(0xFFEAF1E3),
+          elevation: 0,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.edit, color: Color(0xFF436946)),
+              tooltip: "Input Barcode Manual",
+              onPressed: () => _showManualInput(context),
+            ),
+          ],
+        ),
 
 
 
@@ -462,13 +463,9 @@ class _ScanPageState extends State<ScanPage> {
 
 
         ],
-
-
       ),
-
-
-    );
-
-  }
+    ),
+  );
+}
 
 }

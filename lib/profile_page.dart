@@ -43,8 +43,10 @@ class _ProfilePageState extends State<ProfilePage> {
               : const Stream.empty(),
           builder: (context, userSnapshot) {
             String name = "Pengguna EcoScan";
+            String photoUrl = "https://api.dicebear.com/7.x/bottts/png?seed=ecoscan";
             if (userSnapshot.hasData && userSnapshot.data!.exists) {
               name = userSnapshot.data!.data()?['name'] ?? "Pengguna EcoScan";
+              photoUrl = userSnapshot.data!.data()?['photoUrl'] ?? "https://api.dicebear.com/7.x/bottts/png?seed=ecoscan";
             }
 
             return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
@@ -86,11 +88,9 @@ class _ProfilePageState extends State<ProfilePage> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: ListTile(
-                          leading: const CircleAvatar(
+                          leading: CircleAvatar(
                             radius: 30,
-                            backgroundImage: NetworkImage(
-                              "https://api.dicebear.com/7.x/bottts/png?seed=ecoscan",
-                            ),
+                            backgroundImage: NetworkImage(photoUrl),
                           ),
                           title: Text(
                             name,

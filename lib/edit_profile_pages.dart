@@ -20,6 +20,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   bool _isLoading = true;
   bool _isSaving = false;
+  String _selectedAvatar = "https://api.dicebear.com/7.x/bottts/png?seed=ecoscan";
 
   @override
   void initState() {
@@ -54,6 +55,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
           nameController.text = data['name'] ?? '';
           phoneController.text = data['phone'] ?? '';
           bioController.text = data['bio'] ?? '';
+          _selectedAvatar = data['photoUrl'] ?? "https://api.dicebear.com/7.x/bottts/png?seed=ecoscan";
         }
       } catch (e) {
         print('Error loading user profile: $e');
@@ -88,6 +90,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         'name': name,
         'phone': phoneController.text.trim(),
         'bio': bioController.text.trim(),
+        'photoUrl': _selectedAvatar,
       });
 
       if (mounted) {
@@ -175,28 +178,29 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 child: Column(
                   children: [
                     /// FOTO PROFIL
-                    Stack(
-                      alignment: Alignment.bottomRight,
-                      children: [
-                        const CircleAvatar(
-                          radius: 50,
-                          backgroundImage: NetworkImage(
-                            "https://api.dicebear.com/7.x/bottts/png?seed=ecoscan",
+                    GestureDetector(
+                      onTap: () => _showAvatarPicker(context),
+                      child: Stack(
+                        alignment: Alignment.bottomRight,
+                        children: [
+                          CircleAvatar(
+                            radius: 50,
+                            backgroundImage: NetworkImage(_selectedAvatar),
                           ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: const BoxDecoration(
-                            color: Color(0xFF436946),
-                            shape: BoxShape.circle,
+                          Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: const BoxDecoration(
+                              color: Color(0xFF436946),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.camera_alt,
+                              color: Colors.white,
+                              size: 20,
+                            ),
                           ),
-                          child: const Icon(
-                            Icons.camera_alt,
-                            color: Colors.white,
-                            size: 20,
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 8),
                     const Text(
@@ -297,6 +301,73 @@ class _EditProfilePageState extends State<EditProfilePage> {
         ),
         const SizedBox(height: 16),
       ],
+    );
+  }
+
+  final List<String> _avatarPresets = [
+    "https://api.dicebear.com/7.x/bottts/png?seed=ecoscan",
+    "https://api.dicebear.com/7.x/identicon/png?seed=leaf",
+    "https://api.dicebear.com/7.x/avataaars/png?seed=Felix",
+    "https://api.dicebear.com/7.x/avataaars/png?seed=Aneka",
+    "https://api.dicebear.com/7.x/adventurer/png?seed=kitty",
+    "https://api.dicebear.com/7.x/adventurer/png?seed=fox",
+  ];
+
+  void _showAvatarPicker(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetContext) {
+        return Container(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                "Pilih Foto Profil Anda",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                height: 120,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: _avatarPresets.length,
+                  itemBuilder: (context, index) {
+                    final avatarUrl = _avatarPresets[index];
+                    final isSelected = _selectedAvatar == avatarUrl;
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _selectedAvatar = avatarUrl;
+                        });
+                        Navigator.pop(sheetContext);
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 8),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: isSelected ? const Color(0xFF436946) : Colors.transparent,
+                            width: 3,
+                          ),
+                        ),
+                        child: CircleAvatar(
+                          radius: 40,
+                          backgroundImage: NetworkImage(avatarUrl),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 10),
+            ],
+          ),
+        );
+      },
     );
   }
 }

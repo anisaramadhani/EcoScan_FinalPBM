@@ -24,13 +24,31 @@ class _RiwayatPageState extends State<RiwayatPage> {
     final user = _auth.currentUser;
     final uid = user?.uid ?? '';
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFEAF1E3),
-      appBar: AppBar(
-        title: const Text("Riwayat"),
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        if (didPop) return;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const DashboardPage()),
+        );
+      },
+      child: Scaffold(
         backgroundColor: const Color(0xFFEAF1E3),
-        elevation: 0,
-      ),
+        appBar: AppBar(
+          title: const Text("Riwayat"),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.black),
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const DashboardPage()),
+              );
+            },
+          ),
+          backgroundColor: const Color(0xFFEAF1E3),
+          elevation: 0,
+        ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -165,8 +183,9 @@ class _RiwayatPageState extends State<RiwayatPage> {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _historyView(List<QueryDocumentSnapshot<Map<String, dynamic>>> docs) {
     if (docs.isEmpty) {
@@ -191,6 +210,7 @@ class _RiwayatPageState extends State<RiwayatPage> {
   Widget _impactView(List<QueryDocumentSnapshot<Map<String, dynamic>>> docs) {
     int greenCount = 0;
     double totalCo2 = 0.0;
+    List<double> weeklyCo2 = [0.0, 0.0, 0.0, 0.0];
 
     for (var doc in docs) {
       final data = doc.data();
@@ -202,13 +222,36 @@ class _RiwayatPageState extends State<RiwayatPage> {
       }
 
       final co2 = data['co2Saved'];
+      double co2Val = 0.0;
       if (co2 != null) {
-        totalCo2 += (co2 as num).toDouble();
+        co2Val = (co2 as num).toDouble();
+        totalCo2 += co2Val;
+      }
+
+      final timestamp = data['scannedAt'] as Timestamp?;
+      if (timestamp != null) {
+        final date = timestamp.toDate();
+        final now = DateTime.now();
+        if (date.year == now.year && date.month == now.month) {
+          int week = (date.day - 1) ~/ 7;
+          if (week >= 0 && week < 4) {
+            weeklyCo2[week] += co2Val;
+          }
+        }
       }
     }
 
-    // Dynamic bar heights based on co2 saved
-    double barHeight = (totalCo2 * 12).clamp(10, 180).toDouble();
+    double maxVal = weeklyCo2[0];
+    for (var val in weeklyCo2) {
+      if (val > maxVal) maxVal = val;
+    }
+
+    double scale = maxVal > 0 ? (120.0 / maxVal) : 1.0;
+
+    double h1 = weeklyCo2[0] > 0 ? (weeklyCo2[0] * scale).clamp(15, 140) : 15.0;
+    double h2 = weeklyCo2[1] > 0 ? (weeklyCo2[1] * scale).clamp(15, 140) : 15.0;
+    double h3 = weeklyCo2[2] > 0 ? (weeklyCo2[2] * scale).clamp(15, 140) : 15.0;
+    double h4 = weeklyCo2[3] > 0 ? (weeklyCo2[3] * scale).clamp(15, 140) : 15.0;
 
     return SingleChildScrollView(
       child: Column(
@@ -255,10 +298,10 @@ class _RiwayatPageState extends State<RiwayatPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      _bar(30), // Minggu 1
-                      _bar(45), // Minggu 2
-                      _bar(20), // Minggu 3
-                      _bar(barHeight), // Minggu 4 (Dynamic berdasarkan real data)
+                      _bar(h1), // Minggu 1
+                      _bar(h2), // Minggu 2
+                      _bar(h3), // Minggu 3
+                      _bar(h4), // Minggu 4
                     ],
                   ),
                 ),
