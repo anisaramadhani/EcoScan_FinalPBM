@@ -130,10 +130,9 @@ class ProductService {
           final productData = decoded['product'];
 
           // Ambil nama
-          final name = productData['product_name_id'] ??
-              productData['product_name'] ??
-              productData['product_name_en'] ??
-              'Produk Tanpa Nama';
+          final name = productData['product_name'] ??
+            productData['product_name_en'] ??
+            'Produk Tanpa Nama';
 
           // Ambil brand
           final brand = productData['brands'] ?? 'Brand Tidak Teridentifikasi';
@@ -197,6 +196,7 @@ class ProductService {
             'price': 22500.0, // default price mock
             'stores': ['Alfamart', 'Indomaret', 'Lotte Mart'],
             'createdAt': Timestamp.now(),
+            'productFound': true,
           };
 
           // Cache ke Firestore
@@ -209,45 +209,54 @@ class ProductService {
     }
 
     // Fallback jika API gagal atau produk tidak ditemukan
-    return _createMockProduct(barcode);
-  }
-
-  // Membuat mockup produk default dan menyimpannya ke Firestore
-  Future<Map<String, dynamic>> _createMockProduct(String barcode) async {
-    final Map<String, dynamic> mockProduct = {
+    return {
       'barcode': barcode,
-      'name': 'Sabun Mandi Organik ($barcode)',
-      'brand': 'EcoLife',
-      'category': 'Pembersih',
-      'ingredients': 'Minyak kelapa sawit terkelola, Gliserin alami, Lidah buaya, Pewangi alami melati.',
+      'name': 'Produk Tidak Ditemukan',
+      'brand': '-',
+      'category': '-',
+      'productFound': false,
+      'ingredients': '-',
       'nutriScore': 'N/A',
-      'packaging': 'Kertas Karton Daur Ulang',
-      'labels': 'Eco-Cert, FSC Certified',
-      'ecoScore': 'A',
-      'ecoScoreFromAPI': false,
-      ..._getEcoScoreDetails('A'),
-      'price': 25000.0,
-      'stores': ['Alfamart', 'Indomaret'],
-      'createdAt': Timestamp.now(),
+      'packaging': '-',
+      'labels': '-',
+      'ecoScore': 'E',
+      'ecoGradeDesc': 'Produk tidak ditemukan',
+      'ingredientsScore': 0.0,
+      'ingredientsPercentage': '0%',
+      'carbonScore': 0.0,
+      'carbonPercentage': '0%',
+      'co2Saved': 0.0,
+      'isEcoFriendly': false,
+      'price': 0.0,
+      'stores': <String>[],
     };
-
-    // Simpan ke Firestore cache agar selanjutnya bisa dibaca lokal
-    await _db.collection('products').doc(barcode).set(mockProduct);
-    return mockProduct;
   }
 
   // Mengambil data produk, cek di Firestore dulu baru ke API
   Future<Map<String, dynamic>> getProduct(String barcode) async {
-    try {
-      final doc = await _db.collection('products').doc(barcode).get();
-      if (doc.exists && doc.data() != null) {
-        return doc.data()!;
-      }
-    } catch (e) {
-      print('Firestore read error: $e');
+  try {
+    final doc =
+        await _db.collection('products').doc(barcode).get();
+
+    if (doc.exists && doc.data() != null) {
+      return doc.data()!;
     }
-    return fetchProductFromOpenFoodFacts(barcode);
+  } catch (e) {
+    print('Firestore read error: $e');
   }
+
+  final product =
+      await fetchProductFromOpenFoodFacts(barcode);
+
+  if (product['name'] != 'Produk Tidak Ditemukan') {
+    await _db
+        .collection('products')
+        .doc(barcode)
+        .set(product);
+  }
+
+  return product;
+}
 
   // Mendapatkan alternatif produk ramah lingkungan
   Future<List<Map<String, dynamic>>> getAlternatives(String category, String currentBarcode) async {
